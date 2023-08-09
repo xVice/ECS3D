@@ -102,6 +102,17 @@ namespace ECS3D
             return cameraEntity;
         }
 
+        private void glControl1_Resize(object sender, EventArgs e)
+        {
+            if(camera != null)
+            {
+                camera.AspectRatio = (float)ClientSize.Width / ClientSize.Height;
+                Redraw();
+
+            }
+
+        }
+
         public GameEntity CreateObj(string filepath, Vector3 pos)
         {
             var ent = ecsEngine.CreateEntity(Guid.NewGuid().ToString());
@@ -128,7 +139,6 @@ namespace ECS3D
             ecsEngine = new ECSEngine();
 
             ent1 = CreateObj("./teapot.obj", new Vector3(0, 0f, 0f));
-
 
             camera = SetupCam().GetComponent<CameraComponent>();
 
@@ -165,5 +175,7 @@ namespace ECS3D
             }
 
         }
+
+ 
     }
 }

@@ -247,14 +247,7 @@ namespace ECS3D
             GL.DeleteProgram(shaderProgram);
         }
 
-        private void LoadModel(Scene scene, out List<float> vertices, out List<int> indices, out List<float> normals)
-        {
-            var mesh = scene.Meshes[0]; // Assuming there's only one mesh in the scene
 
-            vertices = mesh.Vertices.SelectMany(v => new float[] { v.X, v.Y, v.Z }).ToList();
-            indices = mesh.GetIndices().ToList();
-            normals = mesh.Normals.SelectMany(n => new float[] { n.X, n.Y, n.Z }).ToList();
-        }
 
         private int SetupVAO(List<float> vertices, List<int> indices, List<float> normals)
         {
@@ -287,8 +280,6 @@ namespace ECS3D
         {
             string vertexShaderSource = File.ReadAllText(vertexShaderPath);
             string fragmentShaderSource = File.ReadAllText(fragmentShaderPath);
-            Console.WriteLine("Vertex Shader Code:\n" + vertexShaderSource);
-            Console.WriteLine("Fragment Shader Code:\n" + fragmentShaderSource);
             int vertexShader = GL.CreateShader(ShaderType.VertexShader);
             GL.ShaderSource(vertexShader, vertexShaderSource);
             GL.CompileShader(vertexShader);
@@ -305,9 +296,6 @@ namespace ECS3D
             string fragmentShaderInfoLog = GL.GetShaderInfoLog(fragmentShader);
             string programInfoLog = GL.GetProgramInfoLog(shaderProgram);
 
-            Console.WriteLine("Vertex Shader Log:\n" + vertexShaderInfoLog);
-            Console.WriteLine("Fragment Shader Log:\n" + fragmentShaderInfoLog);
-            Console.WriteLine("Program Log:\n" + programInfoLog);
             GL.DetachShader(shaderProgram, vertexShader);
             GL.DetachShader(shaderProgram, fragmentShader);
             GL.DeleteShader(vertexShader);
@@ -336,6 +324,15 @@ namespace ECS3D
 
             MeshComponent model = new MeshComponent(scene);
             return model;
+        }
+
+        private void LoadModel(Scene scene, out List<float> vertices, out List<int> indices, out List<float> normals)
+        {
+            var mesh = scene.Meshes[0]; // Assuming there's only one mesh in the scene
+
+            vertices = mesh.Vertices.SelectMany(v => new float[] { v.X, v.Y, v.Z }).ToList();
+            indices = mesh.GetIndices().ToList();
+            normals = mesh.Normals.SelectMany(n => new float[] { n.X, n.Y, n.Z }).ToList();
         }
     }
 

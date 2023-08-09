@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{35C973BA-C8D2-45BC-BEC1-1FD1AF68F20A}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <RootNamespace>ECS3D</RootNamespace>
     <AssemblyName>ECS3D</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
