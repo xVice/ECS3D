@@ -205,21 +205,34 @@ namespace ECS3D
             }
         }
 
-        public void Draw(CameraComponent cam, Vector3 lightDirection)
+        public void Draw(CameraComponent cam, Matrix4 mvpMatrix, Matrix4 modelMatrix, Vector3 lightDirection)
         {
-            GL.Enable(EnableCap.DepthTest);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-
             int shaderProgram = CreateAndLinkShaderProgram("./vert.shader", "./frag.shader");
             CheckGLError("GL.CompileShader");
             GL.UseProgram(shaderProgram);
+
+            int mvpLocation = GL.GetUniformLocation(shaderProgram, "mvpMatrix");
+            GL.UniformMatrix4(mvpLocation, false, ref mvpMatrix);
+
+            int modelMatrixLocation = GL.GetUniformLocation(shaderProgram, "modelMatrix");
+            GL.UniformMatrix4(modelMatrixLocation, false, ref modelMatrix);
+
+            // Calculate the normal matrix
+            Matrix3 normalMatrix = new Matrix3(Matrix4.Transpose(Matrix4.Invert(modelMatrix)));
+            int normalMatrixLocation = GL.GetUniformLocation(shaderProgram, "normalMatrix");
+            GL.UniformMatrix3(normalMatrixLocation, false, ref normalMatrix);
 
             int lightDirectionLocation = GL.GetUniformLocation(shaderProgram, "lightDirection");
             GL.Uniform3(lightDirectionLocation, ref lightDirection);
 
             int cameraPosLocation = GL.GetUniformLocation(shaderProgram, "cameraPos");
             GL.Uniform3(cameraPosLocation, cam.Position);
+
+            int lightColorLocation = GL.GetUniformLocation(shaderProgram, "lightColor");
+            GL.Uniform3(lightColorLocation, new Vector3(1.0f, 1.0f, 1.0f)); // White light color
+
+            int objectColorLocation = GL.GetUniformLocation(shaderProgram, "objectColor");
+            GL.Uniform3(objectColorLocation, new Vector3(0.7f, 0.7f, 1.0f)); // Light blue object color
 
             List<float> vertices, normals;
             List<int> indices;
@@ -258,7 +271,7 @@ namespace ECS3D
             GL.BindBuffer(BufferTarget.ArrayBuffer, vboNormals);
             GL.BufferData(BufferTarget.ArrayBuffer, normals.Count * sizeof(float), normals.ToArray(), BufferUsageHint.StaticDraw);
             GL.VertexAttribPointer(1, 3, VertexAttribPointerType.Float, false, 3 * sizeof(float), 0);
-            GL.EnableVertexAttribArray(1);
+            GL.EnableVertexAttribArray(1);  // Use index 1 for normals
 
             int ebo = GL.GenBuffer();
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, ebo);
@@ -267,6 +280,8 @@ namespace ECS3D
             GL.BindVertexArray(0);
             return vao;
         }
+
+
 
         private int CreateAndLinkShaderProgram(string vertexShaderPath, string fragmentShaderPath)
         {
@@ -344,10 +359,9 @@ namespace ECS3D
             Matrix4 worldMatrix = transformComponent.GetModelMatrix();
             Matrix4 mvpMatrix = worldMatrix * viewMatrix * projectionMatrix;
             GL.MatrixMode(MatrixMode.Modelview);
-            GL.PushMatrix();
             GL.LoadMatrix(ref mvpMatrix);
 
-            meshComponent.Draw(cam, new Vector3(50,50,0));
+            meshComponent.Draw(cam,mvpMatrix,worldMatrix, new Vector3(100,100,0));
         }
     }
 
@@ -361,11 +375,15 @@ namespace ECS3D
         public float AspectRatio { get; set; }
         public float NearPlane { get; set; }
         public float FarPlane { get; set; }
-
         public float MoveSpeed { get; set; } = 0.1f;
 
+        private float pitch = 0; // Vertical rotation angle
+        private float yaw = 0;   // Horizontal rotation angle
+
         // Camera rotation speed
-        public float RotationSpeed { get; set; } = 0.001f;
+        public float RotationSpeed { get; set; } = 0.000001f;
+
+        // Constructor
 
         // Calculate the view matrix
         public Matrix4 GetViewMatrix()
@@ -389,38 +407,49 @@ namespace ECS3D
                 case Keys.W:
                 case Keys.Up:
                     Position += cameraForward * MoveSpeed;
+                    Target += cameraForward * MoveSpeed; // Move target as well
                     break;
 
                 case Keys.A:
                 case Keys.Left:
                     Position -= cameraRight * MoveSpeed;
+                    Target -= cameraRight * MoveSpeed; // Move target as well
                     break;
 
                 case Keys.D:
                 case Keys.Right:
                     Position += cameraRight * MoveSpeed;
-                 
+                    Target += cameraRight * MoveSpeed; // Move target as well
                     break;
 
                 case Keys.S:
                 case Keys.Down:
                     Position -= cameraForward * MoveSpeed;
+                    Target -= cameraForward * MoveSpeed; // Move target as well
                     break;
             }
-
-            
         }
 
         // Function to rotate the camera using mouse input
         public void RotateCameraMouse(float deltaX, float deltaY)
         {
+            yaw += deltaX * RotationSpeed;
+            pitch += deltaY * RotationSpeed;
 
-   
+            pitch = MathHelper.Clamp(pitch, -MathHelper.PiOver2, MathHelper.PiOver2);
 
-     
+            // Create rotation quaternions for yaw and pitch
+            Quaternion yawRotation = Quaternion.FromAxisAngle(Vector3.UnitY, yaw);
+            Quaternion pitchRotation = Quaternion.FromAxisAngle(Vector3.UnitX, pitch);
+
+            // Combine the rotations
+            Quaternion combinedRotation = pitchRotation * yawRotation;
+
+            // Rotate the camera position and up vector
+            Vector3 rotatedCameraPosition = Vector3.Transform(Position - Target, combinedRotation);
+            Position = Target + rotatedCameraPosition;
+            Up = Vector3.Transform(Vector3.UnitY, combinedRotation);
         }
-
-
     }
 
 
@@ -453,7 +482,8 @@ namespace ECS3D
             Matrix4 rotationMatrix = Matrix4.CreateFromQuaternion(Rotation);
             Matrix4 scaleMatrix = Matrix4.CreateScale(Scale);
 
-            return scaleMatrix * rotationMatrix * translationMatrix;
+            return translationMatrix * rotationMatrix * scaleMatrix;
+
         }
     }
 

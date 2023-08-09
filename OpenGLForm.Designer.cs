@@ -40,6 +40,8 @@
             this.glControl1.TabIndex = 0;
             this.glControl1.VSync = false;
             this.glControl1.Paint += new System.Windows.Forms.PaintEventHandler(this.glControl1_Paint);
+            this.glControl1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.glControl1_KeyDown);
+            this.glControl1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.glControl1_MouseMove);
             // 
             // OpenGLForm
             // 
@@ -50,6 +52,9 @@
             this.Name = "OpenGLForm";
             this.Text = "OpenGLForm";
             this.Load += new System.EventHandler(this.OpenGLForm_Load);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OpenGLForm_KeyDown);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.OpenGLForm_KeyPress);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OpenGLForm_MouseMove);
             this.ResumeLayout(false);
 
         }
