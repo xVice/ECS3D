@@ -29,10 +29,13 @@ namespace ECS3D
         private void glControl1_Paint(object sender, PaintEventArgs e)
         {
             glControl1.MakeCurrent();
-            GL.Viewport(0,0, glControl1.ClientSize.Width, glControl1.ClientSize.Height);
+
 
             var viewMatrix = camera.GetViewMatrix();
             var projectionMatrix = camera.GetProjectionMatrix();
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadIdentity();
+            GL.Viewport(0, 0, glControl1.ClientSize.Width, glControl1.ClientSize.Height);
             GL.LoadMatrix(ref viewMatrix);
             GL.LoadMatrix(ref projectionMatrix);
 
@@ -46,11 +49,13 @@ namespace ECS3D
             }
 
             // Clear OpenGL framebuffer
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
+
 
             // Render the mesh
             foreach (var renderer in ecsEngine.GetComponents<MeshRenderer>())
             {
+  
                 renderer.Render(camera, viewMatrix, projectionMatrix, new List<System.Numerics.Vector3> { new System.Numerics.Vector3(0, 0, 0) });
             }
             ecsEngine.Update();
@@ -58,7 +63,7 @@ namespace ECS3D
             glControl1.SwapBuffers();
 
             previousTime = currentTime;
-            glControl1.Refresh();
+            //glControl1.Refresh();
         }
 
         private float GetCurrentTimeInSeconds()
@@ -73,7 +78,7 @@ namespace ECS3D
             cameraEntity = ecsEngine.CreateEntity("Camera1");
             camera = new CameraComponent
             {
-                Position = new Vector3(0f, 0f, -15f),
+                Position = new Vector3(0f, 0f, -200f),
                 Target = Vector3.Zero,
                 Up = Vector3.UnitY,
                 FieldOfView = fieldOfViewRadians,
@@ -93,7 +98,7 @@ namespace ECS3D
             var transform = new TransformComponent();
             transform.Position = pos; // Set the initial position
             transform.Rotation = new Quaternion(new Vector3(0,0,0), 1f); // Set the initial rotation
-            transform.Scale = new Vector3(1f, 1f, 1f); // Set the initial scale
+            transform.Scale = new Vector3(0.1f, 0.1f, 0.1f); // Set the initial scale
             ent.AddComponent<TransformComponent>(transform);
 
             var meshRenderer = new MeshRenderer();

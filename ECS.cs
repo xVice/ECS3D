@@ -208,6 +208,8 @@ namespace ECS3D
         public void Draw(CameraComponent cam, Vector3 lightDirection)
         {
             GL.Enable(EnableCap.DepthTest);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+
 
             int shaderProgram = CreateAndLinkShaderProgram("./vert.shader", "./frag.shader");
             CheckGLError("GL.CompileShader");
@@ -284,12 +286,6 @@ namespace ECS3D
             GL.AttachShader(shaderProgram, vertexShader);
             GL.AttachShader(shaderProgram, fragmentShader);
             GL.LinkProgram(shaderProgram);
-
-            GL.DetachShader(shaderProgram, vertexShader);
-            GL.DetachShader(shaderProgram, fragmentShader);
-            GL.DeleteShader(vertexShader);
-            GL.DeleteShader(fragmentShader);
-
             string vertexShaderInfoLog = GL.GetShaderInfoLog(vertexShader);
             string fragmentShaderInfoLog = GL.GetShaderInfoLog(fragmentShader);
             string programInfoLog = GL.GetProgramInfoLog(shaderProgram);
@@ -297,6 +293,12 @@ namespace ECS3D
             Console.WriteLine("Vertex Shader Log:\n" + vertexShaderInfoLog);
             Console.WriteLine("Fragment Shader Log:\n" + fragmentShaderInfoLog);
             Console.WriteLine("Program Log:\n" + programInfoLog);
+            GL.DetachShader(shaderProgram, vertexShader);
+            GL.DetachShader(shaderProgram, fragmentShader);
+            GL.DeleteShader(vertexShader);
+            GL.DeleteShader(fragmentShader);
+
+      
 
             return shaderProgram;
         }
@@ -341,6 +343,8 @@ namespace ECS3D
 
             Matrix4 worldMatrix = transformComponent.GetModelMatrix();
             Matrix4 mvpMatrix = worldMatrix * viewMatrix * projectionMatrix;
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.PushMatrix();
             GL.LoadMatrix(ref mvpMatrix);
 
             meshComponent.Draw(cam, new Vector3(50,50,0));
