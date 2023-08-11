@@ -2,16 +2,12 @@
 using System.Windows.Forms;
 using Vector3 = OpenTK.Vector3;
 using ECS3D.ECSEngine;
-using ECS3D.ECSEngine.Components;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace ECS3D
 {
     public partial class OpenGLForm : Form
     {
         private Engine ecsEngine;
-
         public OpenGLForm()
         {
             InitializeComponent();
@@ -23,12 +19,10 @@ namespace ECS3D
             ecsEngine.SetActiveCamera(ecsEngine.CreateCamera("Camera1", new Vector3(0, 0, -15)));
             ecsEngine.Awake();
         }
-
         private void glControl1_Paint(object sender, PaintEventArgs e)
         {
             ecsEngine.RenderFrame();
         }
-
         private void glControl1_Resize(object sender, EventArgs e)
         {
             if(ecsEngine != null)
@@ -36,17 +30,13 @@ namespace ECS3D
                 ecsEngine.FixAspect();
             }
         }
-
-
         private void glControl1_KeyDown(object sender, KeyEventArgs e)
         {
             ecsEngine.MoveCam(e.KeyCode);
         }
-
-        private void glControl1_MouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        private void glControl1_MouseMove(object sender, MouseEventArgs e)
         {
             ecsEngine.RotateCam(e);
         }
-
     }
 }
