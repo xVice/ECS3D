@@ -54,9 +54,6 @@
             this.Name = "OpenGLForm";
             this.Text = "OpenGLForm";
             this.Load += new System.EventHandler(this.OpenGLForm_Load);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.OpenGLForm_KeyDown);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.OpenGLForm_KeyPress);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OpenGLForm_MouseMove);
             this.ResumeLayout(false);
 
         }

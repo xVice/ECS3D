@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{35C973BA-C8D2-45BC-BEC1-1FD1AF68F20A}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>ECS3D</RootNamespace>
     <AssemblyName>ECS3D</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
@@ -41,10 +41,16 @@
     <Reference Include="AssimpNet, Version=4.1.0.0, Culture=neutral, PublicKeyToken=0d51b391f59f42a6, processorArchitecture=MSIL">
       <HintPath>..\packages\AssimpNet.4.1.0\lib\net40\AssimpNet.dll</HintPath>
     </Reference>
+    <Reference Include="glTFLoader, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\glTF2Loader.1.0.0\lib\net452\glTFLoader.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Win32.Primitives, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Win32.Primitives.4.3.0\lib\net46\Microsoft.Win32.Primitives.dll</HintPath>
       <Private>True</Private>
       <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="OpenTK, Version=3.3.3.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
       <HintPath>..\packages\OpenTK.3.3.3\lib\net20\OpenTK.dll</HintPath>
@@ -190,7 +196,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ECS.cs" />
+    <Compile Include="ECSEngine\Engine.cs" />
+    <Compile Include="ECSEngine\Components\CameraComponent.cs" />
+    <Compile Include="ECSEngine\Components\MeshComponent.cs" />
+    <Compile Include="ECSEngine\Components\MeshRenderer.cs" />
+    <Compile Include="ECSEngine\Components\TransformComponent.cs" />
+    <Compile Include="ECSEngine\Internal\EntityComponent.cs" />
+    <Compile Include="ECSEngine\Internal\GameEntity.cs" />
     <Compile Include="OpenGLForm.cs">
       <SubType>Form</SubType>
     </Compile>
