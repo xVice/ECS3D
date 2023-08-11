@@ -1,10 +1,6 @@
 ﻿using ECS3D.ECSEngine.Internal;
 using OpenTK;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ECS3D.ECSEngine.Components
 {

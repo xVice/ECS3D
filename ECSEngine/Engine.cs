@@ -7,10 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using static Assimp.Metadata;
 
 namespace ECS3D.ECSEngine
 {
@@ -111,8 +108,6 @@ namespace ECS3D.ECSEngine
             ent.AddComponent<TransformComponent>(transform);
 
             var meshRenderer = new MeshRenderer();
-            meshRenderer.Engine = this;
-            meshRenderer.Entity = ent;
             ent.AddComponent<MeshRenderer>(meshRenderer);
             ent.Awake();
             return ent;
@@ -142,7 +137,7 @@ namespace ECS3D.ECSEngine
             RenderFrame();
         }
 
-        public void RotateCam(System.Windows.Forms.MouseEventArgs e)
+        public void RotateCam(MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
