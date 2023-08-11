@@ -196,6 +196,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ECSEngine\Control\ECSControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="ECSEngine\Control\ECSControl.Designer.cs">
+      <DependentUpon>ECSControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="ECSEngine\Engine.cs" />
     <Compile Include="ECSEngine\Components\CameraComponent.cs" />
     <Compile Include="ECSEngine\Components\MeshComponent.cs" />
@@ -203,16 +209,19 @@
     <Compile Include="ECSEngine\Components\TransformComponent.cs" />
     <Compile Include="ECSEngine\Internal\EntityComponent.cs" />
     <Compile Include="ECSEngine\Internal\GameEntity.cs" />
-    <Compile Include="OpenGLForm.cs">
+    <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="OpenGLForm.Designer.cs">
-      <DependentUpon>OpenGLForm.cs</DependentUpon>
+    <Compile Include="Form1.Designer.cs">
+      <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="OpenGLForm.resx">
-      <DependentUpon>OpenGLForm.cs</DependentUpon>
+    <EmbeddedResource Include="ECSEngine\Control\ECSControl.resx">
+      <DependentUpon>ECSControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

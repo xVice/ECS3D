@@ -6,6 +6,8 @@ using OpenTK.Graphics.OpenGL;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -23,18 +25,34 @@ namespace ECS3D.ECSEngine
 
         float previousTime;
 
+        private int skyboxShader = 0;
+        private int skyboxTexture = 0;
+
         private Point lastMousePos;
+
+
+
+        public Engine(GLControl control)
+        {
+            activeGlControl = control;
+
+
+
+            //skyboxTexture = LoadSkyboxTexture();
+            //skyboxShader = LoadSkyboxShader();
+
+        }
+
+        public List<GameEntity> GetEntities()
+        {
+            return entities;
+        }
 
         private void CenterMouseCursor()
         {
             Point center = new Point(activeGlControl.Width / 2, activeGlControl.Height / 2);
             Cursor.Position = activeGlControl.PointToScreen(center);
             lastMousePos = center;
-        }
-
-        public Engine(GLControl control)
-        {
-            activeGlControl = control;
         }
 
         public GameEntity CreateEntity(string name)
@@ -57,7 +75,7 @@ namespace ECS3D.ECSEngine
         {
             if (activeCamera != null)
             {
-                activeCamera.AspectRatio = (float)activeGlControl.ClientSize.Width / activeGlControl.ClientSize.Height;
+                activeCamera.AspectRatio = (float)activeGlControl.ClientSize.Width / (float)activeGlControl.ClientSize.Height;
                 RenderFrame();
 
             }
@@ -157,47 +175,34 @@ namespace ECS3D.ECSEngine
 
         public void RenderFrame()
         {
-            if(activeCamera != null)
+            if (activeCamera != null)
             {
                 activeGlControl.MakeCurrent();
 
+                GL.ClearColor(Color.Gray);
+                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
                 var viewMatrix = activeCamera.GetViewMatrix();
                 var projectionMatrix = activeCamera.GetProjectionMatrix();
-                GL.Enable(EnableCap.DepthTest);
-                GL.Enable(EnableCap.CullFace);
 
                 // Set culling mode to back faces
+                GL.Enable(EnableCap.DepthTest);
+                GL.Enable(EnableCap.CullFace);
                 GL.CullFace(CullFaceMode.Back);
-                GL.MatrixMode(MatrixMode.Projection);
-                GL.LoadIdentity();
-                GL.Viewport(0, 0, activeGlControl.ClientSize.Width, activeGlControl.ClientSize.Height);
+
+                // Set the view and projection matrices as uniforms in your shaders
+                // You should have this setup in your shaders
+                GL.MatrixMode(MatrixMode.Modelview);
                 GL.LoadMatrix(ref viewMatrix);
+                GL.MatrixMode(MatrixMode.Projection);
                 GL.LoadMatrix(ref projectionMatrix);
 
-                float currentTime = GetCurrentTimeInSeconds();
-                float deltaTime = currentTime - previousTime;
-
-                // Ensure previousTime is valid before using it to calculate delta time
-                if (previousTime != 0) // You can also add a check for deltaTime > 0 if needed
-                {
-                    DeltaTime = deltaTime;
-                }
-
-
-
-                // Clear OpenGL framebuffer
-                GL.ClearColor(Color.Gray);
-
-                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-                // Begin occlusion query
+                // Render the skybox first
+                //RenderSkybox();
 
                 // Render the mesh
                 foreach (var renderer in GetComponents<MeshRenderer>())
                 {
-
-
                     int queryId;
                     GL.GenQueries(1, out queryId);
                     GL.BeginQuery(QueryTarget.SamplesPassed, queryId);
@@ -211,16 +216,138 @@ namespace ECS3D.ECSEngine
                     // Delete the query object
                     GL.DeleteQueries(1, ref queryId);
                 }
-                // End occlusion query
 
-                Update();
-                // Finally, swap the back and front buffers to display the rendered image
+                // Swap buffers
                 activeGlControl.SwapBuffers();
+            }
+        }
 
-                previousTime = currentTime;
-                //glControl1.Refresh();
+
+        private int LoadSkyboxShader()
+        {
+            // Implement shader loading here and return the shader program ID
+            // Example:
+            string vertexShaderSource = LoadShaderSource("./shaders/builtin/skyboxes/SkyboxVertexShader.glsl");
+            string fragmentShaderSource = LoadShaderSource("./shaders/builtin/skyboxes/SkyboxFragmentShader.glsl");
+            int shaderProgram = CompileShaderProgram(vertexShaderSource, fragmentShaderSource);
+            // return shaderProgram;
+            return shaderProgram; // Placeholder, replace with actual implementation.
+        }
+
+        public static string LoadShaderSource(string filePath)
+        {
+            string shaderSource = string.Empty;
+
+            try
+            {
+                using (StreamReader reader = new StreamReader(filePath))
+                {
+                    shaderSource = reader.ReadToEnd();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error loading shader source: " + e.Message);
             }
 
+            return shaderSource;
+        }
+
+        public static int CompileShaderProgram(string vertexShaderSource, string fragmentShaderSource)
+        {
+            int vertexShader = GL.CreateShader(ShaderType.VertexShader);
+            GL.ShaderSource(vertexShader, vertexShaderSource);
+            GL.CompileShader(vertexShader);
+
+            int fragmentShader = GL.CreateShader(ShaderType.FragmentShader);
+            GL.ShaderSource(fragmentShader, fragmentShaderSource);
+            GL.CompileShader(fragmentShader);
+
+            int shaderProgram = GL.CreateProgram();
+            GL.AttachShader(shaderProgram, vertexShader);
+            GL.AttachShader(shaderProgram, fragmentShader);
+            GL.LinkProgram(shaderProgram);
+
+            // Check for compilation errors and shader program linking status
+            GL.GetShader(vertexShader, ShaderParameter.CompileStatus, out int vertexShaderStatus);
+            GL.GetShaderInfoLog(vertexShader, out string vertexShaderInfoLog);
+            Console.WriteLine("Vertex shader compilation status: " + (vertexShaderStatus == 1 ? "Success" : "Failure"));
+            Console.WriteLine("Vertex shader info log:\n" + vertexShaderInfoLog);
+
+            GL.GetShader(fragmentShader, ShaderParameter.CompileStatus, out int fragmentShaderStatus);
+            GL.GetShaderInfoLog(fragmentShader, out string fragmentShaderInfoLog);
+            Console.WriteLine("Fragment shader compilation status: " + (fragmentShaderStatus == 1 ? "Success" : "Failure"));
+            Console.WriteLine("Fragment shader info log:\n" + fragmentShaderInfoLog);
+
+            GL.GetProgram(shaderProgram, GetProgramParameterName.LinkStatus, out int shaderProgramStatus);
+            GL.GetProgramInfoLog(shaderProgram, out string shaderProgramInfoLog);
+            Console.WriteLine("Shader program linking status: " + (shaderProgramStatus == 1 ? "Success" : "Failure"));
+            Console.WriteLine("Shader program info log:\n" + shaderProgramInfoLog);
+
+            return shaderProgram;
+        }
+
+        private void RenderSkybox()
+        {
+            GL.UseProgram(skyboxShader);
+
+            var viewMatrixNoTranslation = activeCamera.GetViewMatrix();
+            GL.UniformMatrix4(0, false, ref viewMatrixNoTranslation);
+            var projMatrix = activeCamera.GetProjectionMatrix();
+            GL.UniformMatrix4(1, false, ref projMatrix);
+
+            GL.Disable(EnableCap.DepthTest);
+            GL.Disable(EnableCap.CullFace);
+
+            GL.BindTexture(TextureTarget.TextureCubeMap, skyboxTexture);
+
+            //GL.BindVertexArray(cubeVAO);
+            GL.DrawArrays(PrimitiveType.Triangles, 0, 36);  // 36 vertices for a cube
+            GL.BindVertexArray(0);
+
+            GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.CullFace);
+
+            GL.BindTexture(TextureTarget.TextureCubeMap, 0);
+
+            GL.UseProgram(0);
+        }
+
+
+        private int LoadSkyboxTexture()
+        {
+            // Implement texture loading here and return the texture ID
+            // Example:
+            int textureId = LoadTexture("./textures/builtin/skyboxes/SkyboxTexture.png");
+            return textureId;
+           
+        }
+
+        public static int LoadTexture(string filePath)
+        {
+            int textureId = GL.GenTexture();
+            GL.BindTexture(TextureTarget.Texture2D, textureId);
+
+            Bitmap bmp = new Bitmap(filePath);
+            BitmapData bmpData = bmp.LockBits(
+                new Rectangle(0, 0, bmp.Width, bmp.Height),
+                ImageLockMode.ReadOnly,
+                System.Drawing.Imaging.PixelFormat.Format32bppArgb
+            );
+
+            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba,
+                          bmpData.Width, bmpData.Height, 0,
+                          OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte,
+                          bmpData.Scan0);
+
+            bmp.UnlockBits(bmpData);
+
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+
+            return textureId;
         }
 
         public void SetActiveGlControl(GLControl control)

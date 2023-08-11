@@ -16,7 +16,7 @@ namespace ECS3D
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new OpenGLForm());
+            Application.Run(new Form1());
         }
     }
 }
