@@ -2,7 +2,7 @@
 
 ![ecs img](https://github.com/xVice/storage/blob/main/ghimg.PNG?raw=true)
 
-!!!HEAVILY IN DEV, README MD MADE BY CHATGPT WILL BE UPDATED IN THE FUTURE!!!
+!!(should still compile)DEPRECATED USE: https://github.com/xVice/Lumina3D !!
 
 ECS3D.ECSEngine is a C# WinForms library for building 3D game engines using the Entity-Component-System architecture. It provides functionality for managing game entities, components, cameras, rendering, and more.
 
